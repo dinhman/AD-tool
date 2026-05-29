@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getConfig, saveConfig } from './config';
+import { getConfig, saveConfig, getDefaultConfig } from './config';
 import { AutoScaleDaemon } from './daemon';
 import { mouse } from '@nut-tree-fork/nut-js';
 
@@ -25,6 +25,17 @@ app.post('/api/config', (req, res) => {
         res.json({ success: true });
     } else {
         res.status(500).json({ success: false, error: 'Failed to save config' });
+    }
+});
+
+app.post('/api/config/reset', (req, res) => {
+    const defaultConfig = getDefaultConfig();
+    const success = saveConfig(defaultConfig);
+    if (success) {
+        daemon.updateConfig(defaultConfig);
+        res.json({ success: true, config: defaultConfig });
+    } else {
+        res.status(500).json({ success: false, error: 'Failed to reset config' });
     }
 });
 

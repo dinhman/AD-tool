@@ -34,6 +34,19 @@ export interface AppConfig {
 
 const configPath = path.resolve(process.cwd(), 'config.json');
 
+export const DEFAULT_CONFIG: AppConfig = {
+    general: { thresholdWaiting: 2, stepUp: 1, stepDown: 1, maxLines: 50, minLines: 10, cooldownMs: 10000, monitoredAgents: "", monitorOnly: false, webhookUrl: 'https://n8n.interlogistics.vn/webhook-test/ea182ac0-70dd-483b-aa8e-e8e9db0f26ad' },
+    database: { server: '127.0.0.1', port: 1433, user: 'sa', password: '', database: 'DeltaTellBox' },
+    click: {
+        camp1_inputX: 0, camp1_inputY: 0, camp1_saveX: 0, camp1_saveY: 0,
+        camp2_inputX: 0, camp2_inputY: 0, camp2_saveX: 0, camp2_saveY: 0
+    }
+};
+
+export function getDefaultConfig(): AppConfig {
+    return DEFAULT_CONFIG;
+}
+
 export function getConfig(): AppConfig {
     try {
         const data = fs.readFileSync(configPath, 'utf8');
@@ -46,24 +59,13 @@ export function getConfig(): AppConfig {
         if (parsed.general.webhookUrl === undefined) parsed.general.webhookUrl = 'https://n8n.interlogistics.vn/webhook-test/ea182ac0-70dd-483b-aa8e-e8e9db0f26ad';
         
         if (!parsed.click || (parsed.click as any).inputLineX !== undefined) {
-            // Migrate old config or set default
-            parsed.click = {
-                camp1_inputX: 0, camp1_inputY: 0, camp1_saveX: 0, camp1_saveY: 0,
-                camp2_inputX: 0, camp2_inputY: 0, camp2_saveX: 0, camp2_saveY: 0
-            };
+            parsed.click = DEFAULT_CONFIG.click;
         }
         
         return parsed;
     } catch (error) {
         console.error('Error reading config.json. Using defaults.', error);
-        return {
-            general: { thresholdWaiting: 2, stepUp: 1, stepDown: 1, maxLines: 50, minLines: 10, cooldownMs: 10000, monitoredAgents: "", monitorOnly: false, webhookUrl: 'https://n8n.interlogistics.vn/webhook-test/ea182ac0-70dd-483b-aa8e-e8e9db0f26ad' },
-            database: { server: '127.0.0.1', port: 1433, user: 'sa', password: '', database: 'DeltaTellBox' },
-            click: {
-                camp1_inputX: 0, camp1_inputY: 0, camp1_saveX: 0, camp1_saveY: 0,
-                camp2_inputX: 0, camp2_inputY: 0, camp2_saveX: 0, camp2_saveY: 0
-            }
-        };
+        return DEFAULT_CONFIG;
     }
 }
 

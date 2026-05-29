@@ -6,6 +6,7 @@ function App() {
   const [dashboard, setDashboard] = useState<any>({ logs: [], stats: { awaiting: 0, inTalk: 0, total: 0, currentLines: 0 }, agents: [] });
   const [loading, setLoading] = useState(true);
 const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
+const [capturing, setCapturing] = useState<string | null>(null);
 
   const fetchConfig = async () => {
     try {
@@ -49,6 +50,22 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
     }
   };
 
+  const resetConfig = async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn khôi phục cấu hình mặc định? Toàn bộ thiết lập hiện tại sẽ bị xóa.')) return;
+    try {
+      const res = await fetch('http://localhost:3005/api/config/reset', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setConfig(data.config);
+        alert('Đã khôi phục cấu hình mặc định!');
+      } else {
+        alert('Lỗi khi khôi phục cấu hình');
+      }
+    } catch (e) {
+      alert('Lỗi kết nối khi khôi phục cấu hình');
+    }
+  };
+
   const toggleBot = async () => {
     const action = botStatus ? 'stop' : 'start';
     try {
@@ -62,7 +79,8 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
   };
 
   const captureMouse = async (category: string, fieldX: string, fieldY: string) => {
-    alert('Bạn có 5 giây để di chuột đến vị trí mong muốn. Đừng click, chỉ cần để chuột ở đó!');
+    const captureId = `${category}_${fieldX}`;
+    setCapturing(captureId);
     try {
       const res = await fetch('http://localhost:3005/api/mouse-capture');
       const data = await res.json();
@@ -76,6 +94,8 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
       }));
     } catch (e) {
       alert('Không lấy được tọa độ');
+    } finally {
+      setCapturing(null);
     }
   };
 
@@ -153,7 +173,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold text-gray-700">Ô nhập "Line Limit"</span>
-                        <button onClick={() => captureMouse('click', 'camp1_inputX', 'camp1_inputY')} className="text-xs bg-white border border-gray-300 hover:bg-gray-100 px-3 py-1.5 rounded-lg font-bold text-blue-600 shadow-sm transition-colors">🎯 Bắt tự động</button>
+                        <button onClick={() => captureMouse('click', 'camp1_inputX', 'camp1_inputY')} disabled={capturing === 'click_camp1_inputX'} className={`text-xs border px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors ${capturing === 'click_camp1_inputX' ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-white border-gray-300 hover:bg-gray-100 text-blue-600'}`}>{capturing === 'click_camp1_inputX' ? '⏳ Chờ 5s...' : '🎯 Bắt tự động'}</button>
                       </div>
                       <div className="flex space-x-4">
                         <div className="flex-1"><label className="text-xs font-semibold text-gray-500">X</label><input type="number" value={config.click.camp1_inputX} onChange={(e) => setConfig({...config, click: {...config.click, camp1_inputX: parseInt(e.target.value)}})} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" /></div>
@@ -163,7 +183,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold text-gray-700">Nút "Save"</span>
-                        <button onClick={() => captureMouse('click', 'camp1_saveX', 'camp1_saveY')} className="text-xs bg-white border border-gray-300 hover:bg-gray-100 px-3 py-1.5 rounded-lg font-bold text-blue-600 shadow-sm transition-colors">🎯 Bắt tự động</button>
+                        <button onClick={() => captureMouse('click', 'camp1_saveX', 'camp1_saveY')} disabled={capturing === 'click_camp1_saveX'} className={`text-xs border px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors ${capturing === 'click_camp1_saveX' ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-white border-gray-300 hover:bg-gray-100 text-blue-600'}`}>{capturing === 'click_camp1_saveX' ? '⏳ Chờ 5s...' : '🎯 Bắt tự động'}</button>
                       </div>
                       <div className="flex space-x-4">
                         <div className="flex-1"><label className="text-xs font-semibold text-gray-500">X</label><input type="number" value={config.click.camp1_saveX} onChange={(e) => setConfig({...config, click: {...config.click, camp1_saveX: parseInt(e.target.value)}})} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" /></div>
@@ -178,7 +198,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold text-gray-700">Ô nhập "Line Limit"</span>
-                        <button onClick={() => captureMouse('click', 'camp2_inputX', 'camp2_inputY')} className="text-xs bg-white border border-gray-300 hover:bg-gray-100 px-3 py-1.5 rounded-lg font-bold text-blue-600 shadow-sm transition-colors">🎯 Bắt tự động</button>
+                        <button onClick={() => captureMouse('click', 'camp2_inputX', 'camp2_inputY')} disabled={capturing === 'click_camp2_inputX'} className={`text-xs border px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors ${capturing === 'click_camp2_inputX' ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-white border-gray-300 hover:bg-gray-100 text-blue-600'}`}>{capturing === 'click_camp2_inputX' ? '⏳ Chờ 5s...' : '🎯 Bắt tự động'}</button>
                       </div>
                       <div className="flex space-x-4">
                         <div className="flex-1"><label className="text-xs font-semibold text-gray-500">X</label><input type="number" value={config.click.camp2_inputX} onChange={(e) => setConfig({...config, click: {...config.click, camp2_inputX: parseInt(e.target.value)}})} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" /></div>
@@ -188,7 +208,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold text-gray-700">Nút "Save"</span>
-                        <button onClick={() => captureMouse('click', 'camp2_saveX', 'camp2_saveY')} className="text-xs bg-white border border-gray-300 hover:bg-gray-100 px-3 py-1.5 rounded-lg font-bold text-blue-600 shadow-sm transition-colors">🎯 Bắt tự động</button>
+                        <button onClick={() => captureMouse('click', 'camp2_saveX', 'camp2_saveY')} disabled={capturing === 'click_camp2_saveX'} className={`text-xs border px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors ${capturing === 'click_camp2_saveX' ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-white border-gray-300 hover:bg-gray-100 text-blue-600'}`}>{capturing === 'click_camp2_saveX' ? '⏳ Chờ 5s...' : '🎯 Bắt tự động'}</button>
                       </div>
                       <div className="flex space-x-4">
                         <div className="flex-1"><label className="text-xs font-semibold text-gray-500">X</label><input type="number" value={config.click.camp2_saveX} onChange={(e) => setConfig({...config, click: {...config.click, camp2_saveX: parseInt(e.target.value)}})} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" /></div>
@@ -221,7 +241,10 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
             </div>
           )}
 
-          <div className="flex justify-end pt-2 pb-10">
+          <div className="flex justify-end space-x-4 pt-2 pb-10">
+            <button onClick={resetConfig} className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-xl transition-transform transform hover:scale-105">
+              🔄 RESET MẶC ĐỊNH
+            </button>
             <button onClick={saveConfig} className="bg-gray-900 hover:bg-black text-white px-10 py-3 rounded-xl font-bold shadow-xl transition-transform transform hover:scale-105">
               💾 LƯU CẤU HÌNH
             </button>
