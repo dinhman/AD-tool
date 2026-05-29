@@ -9,7 +9,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
 
   const fetchConfig = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/config');
+      const res = await fetch('http://localhost:3005/api/config');
       const data = await res.json();
       setConfig(data);
       setLoading(false);
@@ -20,7 +20,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/dashboard');
+      const res = await fetch('http://localhost:3005/api/dashboard');
       const data = await res.json();
       setDashboard(data);
       setBotStatus(data.isRunning);
@@ -38,7 +38,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
 
   const saveConfig = async () => {
     try {
-      await fetch('http://localhost:3000/api/config', {
+      await fetch('http://localhost:3005/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)
@@ -52,7 +52,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
   const toggleBot = async () => {
     const action = botStatus ? 'stop' : 'start';
     try {
-      const res = await fetch(`http://localhost:3000/api/bot/${action}`, { method: 'POST' });
+      const res = await fetch(`http://localhost:3005/api/bot/${action}`, { method: 'POST' });
       const data = await res.json();
       setBotStatus(data.isRunning);
       fetchDashboard();
@@ -64,7 +64,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
   const captureMouse = async (category: string, fieldX: string, fieldY: string) => {
     alert('Bạn có 5 giây để di chuột đến vị trí mong muốn. Đừng click, chỉ cần để chuột ở đó!');
     try {
-      const res = await fetch('http://localhost:3000/api/mouse-capture');
+      const res = await fetch('http://localhost:3005/api/mouse-capture');
       const data = await res.json();
       setConfig((prev: any) => ({
         ...prev,
@@ -79,7 +79,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
     }
   };
 
-  if (loading) return <div className="p-10 text-center text-xl font-semibold text-gray-700">Đang tải cấu hình... Hãy chắc chắn Backend đang chạy!</div>;
+  if (loading || !config?.general) return <div className="p-10 text-center text-xl font-semibold text-gray-700">Đang tải cấu hình hoặc kết nối thất bại... Hãy chắc chắn Backend đang chạy ở port 3005!</div>;
 
   return (
     <div className="min-h-screen p-8 text-gray-800 flex justify-center">
@@ -138,7 +138,7 @@ const [activeTab, setActiveTab] = useState<'config' | 'sql'>('config');
                   <h2 className="text-xl font-bold text-gray-800">2. Tọa độ Nhập liệu (Hỗ trợ 2 Campaign)</h2>
                   <button onClick={async () => {
                       try {
-                          const res = await fetch('http://localhost:3000/api/bot/test-click', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lines: 10 }) });
+                          const res = await fetch('http://localhost:3005/api/bot/test-click', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lines: 10 }) });
                           const data = await res.json();
                           alert(data.message || (data.success ? "Test thành công!" : "Test thất bại!"));
                       } catch (e) { alert("Lỗi khi gọi API Test Click"); }
