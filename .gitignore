@@ -8,3 +8,5 @@ database.sqlite-journal
 temp_ocr.png
 test_jimp.png
 .DS_Store
+
+config.json
